@@ -1,10 +1,46 @@
 # MIchaelangelo-Yash-Assignment3-4
 Fixing PHP Blog
+Below is the new admin.php file
 
 
-Hi Yash, 
+<?php include("templates/page_header.php");?>
+<?php include("lib/auth.php") ?>
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Admin</title>
+	<?php include("templates/header.php"); ?>
+</head>
+<body>
+	<?php include("templates/nav.php"); ?>
+	<?php include("templates/contentstart.php"); ?>
 
-I just completely looked at the Cross-Site Scripting (XSS) and made some updates to the editarticle.php file to stop XSS from occurring on the admin.php file under the "Post Title" column. If you would like you can find other XSS vulnerabilities. 
+<h2>Article Management</h2>
 
-[Assignment-3-4.zip](https://github.com/MichaelangeloMirto/MIchaelangelo-Yash-Assignment3-4/files/6137855/Assignment-3-4.zip)
+<p><button type="button" class="btn btn-primary" aria-label="Left Align" onclick="window.location='/newarticle.php';">
+New Post <span class="fa fa-plus" aria-hidden="true"></span>
+</button></p>
 
+<table class="table">
+<tr><th>Post Title</th><th>Author</th><th>Date</th><th>Modify</th><th>Delete</th></tr>
+
+<?php
+# get articles by user or, if role is admin, all articles
+		$result = get_article_list($dbconn);
+		while ($row = pg_fetch_array($result)) {
+	?>
+<tr>
+<?php # Adding in the htmlspecialchars line to stop the rendering of all html code being used on the application. HTML code gets rendered as normal text on screen
+?> 
+ <td><a href='article.php?aid=<?php echo $row['aid'] ?>'><?php echo htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8'); ?></a></td>
+  <td><?php echo $row['author'] ?></td>
+  <td><?php echo substr($row['date'],0,10) ?></td>
+  <td><a href="/editarticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i></a></td>
+  <td><a href="/deletearticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-times fa-2x" aria-hidden="true"></i></a></td>
+</tr>
+	<?php } //close while loop ?>
+</table>
+	<?php include("templates/contentstop.php"); ?>
+	<?php include("templates/footer.php"); ?>
+</body>
+</html>
