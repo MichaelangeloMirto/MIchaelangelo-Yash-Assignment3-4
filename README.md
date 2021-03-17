@@ -1,6 +1,6 @@
 # MIchaelangelo-Yash-Assignment3-4
 Fixing PHP Blog
-Below is the new admin.php file
+Below is the new admin.php file for role-based and XSS
 
 
 <?php include("templates/page_header.php");?>
@@ -31,13 +31,24 @@ New Post <span class="fa fa-plus" aria-hidden="true"></span>
 	?>
 <tr>
 <?php # Adding in the htmlspecialchars line to stop the rendering of all html code being used on the application. HTML code gets rendered as normal text on screen
-?> 
- <td><a href='article.php?aid=<?php echo $row['aid'] ?>'><?php echo htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8'); ?></a></td>
+ ?>
+<?php if($_SESSION['username']=='admin'){ ?>
+  <td><a href='article.php?aid=<?php echo $row['aid'] ?>'><?php echo htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8'); ?></a></td>
   <td><?php echo $row['author'] ?></td>
   <td><?php echo substr($row['date'],0,10) ?></td>
   <td><a href="/editarticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i></a></td>
   <td><a href="/deletearticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-times fa-2x" aria-hidden="true"></i></a></td>
 </tr>
+<?php }else{    ?>
+<td><a href='article.php?aid=<?php echo $row['aid'] ?>'><?php echo htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8'); ?></a></td>
+  <td><?php echo $row['author'] ?></td>
+  <td><?php echo substr($row['date'],0,10) ?></td>
+  <td><a href="/editarticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i></a></td>
+  <?php if($row['author']=='student'){     ?>
+	<td><a href="/deletearticle.php?aid=<?php echo $row['aid'] ?>"><i class="fa fa-times fa-2x" aria-hidden="true"></i></a></td> 
+<?php  }   ?>
+<?php }  ?>
+
 	<?php } //close while loop ?>
 </table>
 	<?php include("templates/contentstop.php"); ?>
