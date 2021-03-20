@@ -1,60 +1,97 @@
 # MIchaelangelo-Yash-Assignment3-4
 Fixing PHP Blog
-Below is the new /templates/page_header.php file for insecure password handling
+Below is the new /login.php file for additional logs to be captured
+
 
 
 <?php
-//create new session
-        session_start();        
-include("config.php");
-        include("lib/db.php");
+include("templates/page_header.php");
 
-/*Password is initially set to 0. After each login attempt that is wrong
-it increments the password by 1. Once the amount of password attempts reaches over 3
-it logs them out for 24 minutes
-*/
-if(!isset($_SESSION['count'])){
-        $_SESSION['count'] = 0;
+
+$pattern = '/a-zA-Z/';
+if(($_SERVER['REQUEST_METHOD'] == 'POST') &&
+ (check_csrf()))  { 
+//if($_SERVER['REQUEST_METHOD'] == 'POST')  {
+
+	$result = authenticate_user($dbconn, $_POST['username'], $_POST['password']);
+
+	if (pg_num_rows($result) == 1) {
+		$_SESSION['username'] = $_POST['username'];
+		$_SESSION['authenticated'] = True;
+		$_SESSION['id'] = pg_fetch_array($result)['id'];	
+		//Redirect to admin area
+       		header("Location: /admin.php");
+
+/*The code below wil log all successful logins into the application recording
+the date, time and username. In the event that somebody uses sql injection to bypass
+you can detect the username is not the correct one. Furthermore this can be implemented
+for failure as well*/
+$date = new DateTime();
+$date = $date->format("y:m:d h:i:s");
+$log_file_data = $log_filename ." " . $date .
+ " " . $_POST['username'] ."\n";
+error_log($log_file_data, 3, "./loginfo.log");
 }
-$_SESSION['count']++;
-if($_SESSION['count'] > 3){
-        echo "Can't login anymore";
-        exit(); 
-}
-
-/*Function to check the csrf token. If the session and post
-tokens are not the same it will send user to error page */
-
-function check_csrf(){
-
-if($_REQUEST["csrf_token"] !== $_SESSION["csrf_token"]){
-
-unset($_SESSION["csrf_token"]);
-die("CSRF token validation failed");
-
-}
-return true;
-}
-
-/*Function generates a new csrf token. If a token is not created in the session, 
-it will generate a new token and store it in the session. If the session token is already
-created it closes the session writing and doesnt allow further processing.  */
-
-function generate_csrf_token(){
-if(!isset($_SESSION["csrf_token"])){
-
-$token = md5(microtime());
-$_SESSION["csrf_token"] = $token;
-
-}else{
-session_write_close();
-}
-return $token;
-}
-
+} 
 ?>
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Login</title>
+	<?php include("templates/header.php"); ?>
+<style>
 
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
 
+.form-signin .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
 
+.form-signin .form-control:focus {
+  z-index: 2;
+}
 
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
 
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>
+</head>
+
+<body>
+	<?php include("templates/nav.php"); ?>
+	<?php include("templates/contentstart.php"); ?>
+
+<form class="form-signin" action='#' method='POST'>
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+      <label for="inputUsername" class="sr-only">Username</label>
+      <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus name='username'>
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required name='password'>
+  //    <input type="hidden" name="cookie" value="<?php echo $attempt_count; ?>" />	
+  //<input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>" /> 
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+</form>
+<br>
+	<?php include("templates/contentstop.php"); ?>
+	<?php include("templates/footer.php"); ?>
+//	<?php echo "login_attempt"; ?>
+	<?php echo " $attempt_count"; ?>	
+</body>
+</html>
