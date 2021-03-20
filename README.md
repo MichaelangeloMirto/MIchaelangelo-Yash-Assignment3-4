@@ -1,14 +1,12 @@
 # MIchaelangelo-Yash-Assignment3-4
 Fixing PHP Blog
-Below is the new /login.php file for additional logs to be captured
-
-
+Below is the new /login.php file for stopping against sql injection
 
 <?php
 include("templates/page_header.php");
 
 
-$pattern = '/a-zA-Z/';
+//$pattern = '/[^\,\.\*\=\(\)\!\]*/';
 if(($_SERVER['REQUEST_METHOD'] == 'POST') &&
  (check_csrf()))  { 
 //if($_SERVER['REQUEST_METHOD'] == 'POST')  {
@@ -77,13 +75,17 @@ error_log($log_file_data, 3, "./loginfo.log");
 <body>
 	<?php include("templates/nav.php"); ?>
 	<?php include("templates/contentstart.php"); ?>
-
+/* In the input field for both username and password we made sure that the textbox
+only accepts usernames and passwords that contain lowercase, uppercase and numbers. It 
+will not accept any special characters or usernames/passwords that have special
+characters in it.
+*/
 <form class="form-signin" action='#' method='POST'>
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
       <label for="inputUsername" class="sr-only">Username</label>
-      <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus name='username'>
+      <input type="text" id="inputUsername" pattern="[a-zA-z0-9]+" class="form-control" placeholder="Username" required autofocus name='username'>
       <label for="inputPassword" class="sr-only">Password</label>
-      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required name='password'>
+      <input type="password" id="inputPassword" pattern="[a-zA-z0-9]+" class="form-control" placeholder="Password" required name='password'>
   //    <input type="hidden" name="cookie" value="<?php echo $attempt_count; ?>" />	
   //<input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>" /> 
       <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
